@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Any
+
 from fasthtml.common import (
     H1,
     H3,
@@ -11,6 +14,7 @@ from fasthtml.common import (
     Main,
     P,
     Script,
+    Span,
     Style,
     Table,
     Tbody,
@@ -29,6 +33,9 @@ from track_element_app.utils.decorators import measure_time
 
 setup_logging()
 
+STATIC_DIR = Path(__file__).parent / "static"
+SPOTIFY_URL = "https://open.spotify.com/"
+
 # SpotifyカラーのCSS
 css = """
 :root {
@@ -38,6 +45,13 @@ css = """
 }
 body { background-color: var(--background-color); color: var(--color); }
 header { padding: 1rem; }
+/* Spotifyブランドガイドライン: グリーンのロゴは黒または白の背景上でのみ使用する */
+.app-header { display: flex; justify-content: space-between; align-items: center; background-color: #000000; }
+.app-header h1 { margin: 0; }
+.spotify-attribution { display: flex; align-items: center; gap: 0.5rem; color: #b3b3b3; font-size: 0.8rem; text-decoration: none; }
+.spotify-attribution img { height: 32px; width: auto; }
+.spotify-link { color: inherit; text-decoration: none; }
+.spotify-link:hover { color: var(--primary); text-decoration: underline; }
 .analysis-results { margin-top: 1rem; }
 .tab-container { display: flex; gap: 1rem; margin: 1rem 0; border-bottom: 1px solid #333; }
 .tab-link { cursor: pointer; padding: 0.5rem 1rem; color: #b3b3b3; text-decoration: none; }
@@ -60,15 +74,45 @@ tbody tr:hover td { background-color: rgba(29, 185, 84, 0.2) !important; }
 }
 """
 
-app, rt = fast_app(hdrs=(Style(css),))
+app, rt = fast_app(hdrs=(Style(css),), static_path=str(STATIC_DIR))
 analyzer = TrackAnalyzer()
 spotify_client = SpotifyClient()
+
+
+def spotify_link(content: Any, item: dict[str, Any]) -> Any:
+    """Spotifyのメタデータをガイドラインに従いSpotify上の該当ページへリンクする"""
+    url = item.get("external_urls", {}).get("spotify")
+    if not url:
+        return content
+    return A(content, href=url, target="_blank", rel="noopener noreferrer", cls="spotify-link")
+
+
+def track_cells(track: dict[str, Any]) -> list[Any]:
+    """アートワーク・アーティスト名・曲名のセルを生成する"""
+    artist = track["artists"][0]
+    artwork = Img(src=track["album"]["images"][-1]["url"], alt=track["album"]["name"], style="height: 40px; border-radius: 4px;")
+    return [
+        Td(spotify_link(artwork, track)),
+        Td(spotify_link(artist["name"], artist)),
+        Td(spotify_link(track["name"], track)),
+    ]
 
 
 @rt("/")
 def get() -> Main:
     return Main(
-        Header(H1("Spotify Insights", style="color: var(--primary);")),
+        Header(
+            H1("Spotify Insights", style="color: var(--primary);"),
+            A(
+                Span("Content provided by"),
+                Img(src="/spotify_logo.png", alt="Spotify"),
+                href=SPOTIFY_URL,
+                target="_blank",
+                rel="noopener noreferrer",
+                cls="spotify-attribution",
+            ),
+            cls="app-header",
+        ),
         Div(
             Div(
                 A("直近の追加曲", hx_get="/analyze", hx_target="#result-area", cls="tab-link active", onclick="updateActiveTab(this)"),
@@ -100,9 +144,7 @@ def get_analyze() -> Div:
         sorted_tracks = sorted(track_list, key=lambda t: t["added_at"], reverse=True)
         ranking_items = [
             Tr(
-                Td(Img(src=t["track"]["album"]["images"][-1]["url"], style="height: 40px; border-radius: 4px;")),
-                Td(t["track"]["artists"][0]["name"]),
-                Td(t["track"]["name"]),
+                *track_cells(t["track"]),
                 Td(t["added_at"][:10]),
             )
             for t in sorted_tracks[:10]
@@ -126,14 +168,7 @@ def get_top_tracks() -> Div:
         # プレイリスト作成用のIDリストをカンマ区切り文字列にする
         track_ids = ",".join([t["id"] for t in items])
 
-        ranking_items = [
-            Tr(
-                Td(Img(src=t["album"]["images"][-1]["url"], style="height: 40px; border-radius: 4px;")),
-                Td(t["artists"][0]["name"]),
-                Td(t["name"]),
-            )
-            for t in items
-        ]
+        ranking_items = [Tr(*track_cells(t)) for t in items]
 
         return Div(
             H3("今週の再生トップ10楽曲"),
@@ -164,7 +199,7 @@ def post(playlist_name: str, track_ids_str: str) -> Div:
 
         return Div(
             P(f"✅ プレイリスト 『{res['name']}』 を作成しました！"),
-            # 成功時に再度リストを表示するボタンなどを置くとより親切です
+            P(spotify_link("OPEN SPOTIFY", res)),
             cls="alert alert-success",
         )
     except Exception as err:
