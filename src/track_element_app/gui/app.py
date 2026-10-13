@@ -40,6 +40,7 @@ SPOTIFY_URL = "https://open.spotify.com/"
 css = """
 :root {
     --primary: #1DB954;
+    --primary-dark: #15803D;
     --background-color: #121212;
     --color: #FFFFFF;
 }
@@ -172,6 +173,7 @@ def get_top_tracks() -> Div:
 
         return Div(
             H3("今週の再生トップ10楽曲"),
+            Table(Thead(Tr(Th(""), Th("アーティスト名"), Th("曲名"))), Tbody(*ranking_items)),
             # プレイリスト作成フォーム
             Form(
                 Input(type="hidden", name="track_ids_str", value=track_ids),
@@ -180,7 +182,6 @@ def get_top_tracks() -> Div:
                 hx_post="/save_playlist",
                 hx_target="#result-area",
             ),
-            Table(Thead(Tr(Th(""), Th("アーティスト名"), Th("曲名"))), Tbody(*ranking_items)),
             cls="analysis-results",
         )
     except Exception as err:
