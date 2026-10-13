@@ -1,4 +1,4 @@
-# Spotify Insights
+# Track Insights
 
 Python学習を目的として開発した、Spotifyライブラリ・ブラウザです。
 
@@ -26,6 +26,7 @@ FastHTMLを用いた非同期Web UI、htmxによる操作、Spotify API連携、
 * loggingによる詳細なログ出力
 * デコレータによる処理時間計測
 * GitHub ActionsによるCI環境
+* Spotifyデザインガイドラインに沿ったロゴ表示・Spotifyへのリンク
 
 ---
 
@@ -33,8 +34,8 @@ FastHTMLを用いた非同期Web UI、htmxによる操作、Spotify API連携、
 
 ### Main Window
 
-![Spotify Insights](docs/images/main1.png)
-![Spotify Insights](docs/images/main2.png)
+![Track Insights](docs/images/main1.png)
+![Track Insights](docs/images/main2.png)
 
 ---
 
@@ -57,13 +58,14 @@ FastHTMLを用いた非同期Web UI、htmxによる操作、Spotify API連携、
 ## ディレクトリ構成
 
 ```text
-Python-Spotify-Insights-main/
+Python-Track-Element-App/
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml
 ├── uv.lock
 ├── docs/
 │   ├── images/
+│   │   ├── Spotify_Full_Logo_RGB_Green-scaled.png
 │   │   ├── main1.png
 │   │   └── main2.png
 │   ├── requirements_definition.md
@@ -77,7 +79,8 @@ Python-Spotify-Insights-main/
 │       ├── config/       # 設定管理（Logging）
 │       │   └── logging_config.py
 │       ├── gui/          # FastHTMLルーティング・UI
-│       │   └── app.py    # Webアプリ版エントリーポイント
+│       │   ├── app.py    # Webアプリ版エントリーポイント
+│       │   └── static/   # 静的ファイル（Spotifyロゴ）
 │       ├── models/       # データクラス
 │       │   └── track.py
 │       ├── services/     # API通信・分析ロジック
@@ -100,7 +103,7 @@ Python-Spotify-Insights-main/
 
 ```bash
 git clone <repository-url>
-cd Python-Spotify-Insights-main
+cd Python-Track-Element-App
 
 uv sync
 ```
@@ -146,6 +149,16 @@ uv run python src/track_element_app/gui/app.py
 * **Web開発:** FastHTML, htmx, Pico CSS, 非同期レスポンス
 * **品質管理:** pytest, unittest.mock, Ruff, Mypy, GitHub Actions
 * **設計手法:** 責務分離, コンポジション, 型ヒントによる静的解析
+
+---
+
+## Spotifyについて
+
+本アプリはSpotify Web APIを利用した個人の学習用アプリケーションであり、Spotify社による提供・承認・提携を受けたものではありません。
+
+楽曲・アーティスト・アルバムアートワーク等のコンテンツはSpotifyから提供されています。[Spotify Design Guidelines](https://developer.spotify.com/documentation/design) に従い、画面上にSpotifyロゴを表示し、各メタデータからSpotify上の該当ページへリンクしています。
+
+Spotify および Spotify ロゴは Spotify AB の商標です。
 
 ---
 

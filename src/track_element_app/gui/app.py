@@ -102,7 +102,7 @@ def track_cells(track: dict[str, Any]) -> list[Any]:
 def get() -> Main:
     return Main(
         Header(
-            H1("Spotify Insights", style="color: var(--primary);"),
+            H1("Track Insights", style="color: var(--primary);"),
             A(
                 Span("Content provided by"),
                 Img(src="/spotify_logo.png", alt="Spotify"),

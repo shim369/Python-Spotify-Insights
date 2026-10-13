@@ -735,7 +735,7 @@ wheels = [
 ]
 
 [[package]]
-name = "python-spotify-insights"
+name = "python-track-insights"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
